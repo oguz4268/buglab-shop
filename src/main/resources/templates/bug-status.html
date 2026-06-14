@@ -15,6 +15,8 @@
             --green-text: #166534;
             --red-bg: #fee2e2;
             --red-text: #991b1b;
+            --yellow-bg: #fffbeb;
+            --yellow-border: #f0d36a;
             --shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
         }
 
@@ -143,6 +145,16 @@
             font-size: 14px;
         }
 
+        .hint {
+            background: var(--yellow-bg);
+            border: 1px solid var(--yellow-border);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 24px;
+            color: #5f4b00;
+            line-height: 1.55;
+        }
+
         .section {
             background: white;
             border: 1px solid var(--border);
@@ -158,36 +170,57 @@
             color: #0f172a;
         }
 
-        .table-wrapper {
-            overflow-x: auto;
+        .bug-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .bug-card {
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 18px;
+            background: #ffffff;
+            overflow: hidden;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 780px;
-            background: white;
-        }
-
-        th,
-        td {
-            padding: 13px 14px;
-            border-bottom: 1px solid var(--border);
-            text-align: left;
-            vertical-align: top;
-            font-size: 14px;
-        }
-
-        th {
+        .bug-card-header {
+            display: grid;
+            grid-template-columns: 120px 110px 1fr;
+            gap: 14px;
+            align-items: center;
+            padding: 16px 18px;
             background: #f8fafc;
-            color: #374151;
-            font-weight: 800;
+            border-bottom: 1px solid var(--border);
         }
 
-        tr:last-child td {
-            border-bottom: none;
+        .bug-title {
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .bug-description {
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 4px;
+            line-height: 1.45;
+        }
+
+        .bug-card-body {
+            padding: 18px;
+        }
+
+        .bug-card-body h3 {
+            margin: 0 0 12px;
+            font-size: 16px;
+            color: #374151;
+        }
+
+        .steps {
+            margin: 0;
+            padding-left: 22px;
+            color: #374151;
+            line-height: 1.65;
+            font-size: 14px;
         }
 
         code {
@@ -205,6 +238,7 @@
             font-size: 12px;
             font-weight: 800;
             white-space: nowrap;
+            width: fit-content;
         }
 
         .status.on {
@@ -215,16 +249,6 @@
         .status.off {
             background: var(--green-bg);
             color: var(--green-text);
-        }
-
-        .hint {
-            background: #fffbeb;
-            border: 1px solid #f0d36a;
-            border-radius: 18px;
-            padding: 18px;
-            margin-bottom: 24px;
-            color: #5f4b00;
-            line-height: 1.55;
         }
 
         .footer {
@@ -250,6 +274,11 @@
 
             .hero h1 {
                 font-size: 34px;
+            }
+
+            .bug-card-header {
+                grid-template-columns: 1fr;
+                gap: 8px;
             }
         }
     </style>
@@ -280,7 +309,8 @@
     <section class="hero">
         <h1>BugLab v1 Status</h1>
         <p>
-            Interne Uebersicht der aktuell aktiven Bug-Toggles aus der application.properties.
+            Interne Uebersicht der aktuell aktiven Bug-Toggles aus der application.properties
+            inklusive Reproduktionsschritten.
         </p>
 
         <div class="summary">
@@ -304,56 +334,58 @@
     <section class="section">
         <h2>UI-getriggerte HTTP/API-artige Fehler</h2>
 
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                <tr>
-                    <th>Bug-ID</th>
-                    <th>Status</th>
-                    <th>Titel</th>
-                    <th>Fehlerbild</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="bug : ${apiBugs}">
-                    <td><code th:text="${bug.id()}">api-001</code></td>
-                    <td>
-                        <span th:if="${bug.enabled()}" class="status on">AKTIV</span>
-                        <span th:unless="${bug.enabled()}" class="status off">AUS</span>
-                    </td>
-                    <td th:text="${bug.title()}">Titel</td>
-                    <td th:text="${bug.description()}">Beschreibung</td>
-                </tr>
-                </tbody>
-            </table>
+        <div class="bug-grid">
+            <article class="bug-card" th:each="bug : ${apiBugs}">
+                <div class="bug-card-header">
+                    <code th:text="${bug.id()}">api-001</code>
+
+                    <span th:if="${bug.enabled()}" class="status on">AKTIV</span>
+                    <span th:unless="${bug.enabled()}" class="status off">AUS</span>
+
+                    <div>
+                        <div class="bug-title" th:text="${bug.title()}">Titel</div>
+                        <div class="bug-description" th:text="${bug.description()}">Beschreibung</div>
+                    </div>
+                </div>
+
+                <div class="bug-card-body">
+                    <h3>Reproduktionsschritte</h3>
+                    <ol class="steps">
+                        <li th:each="step : ${bug.steps()}" th:text="${step}">
+                            Schritt
+                        </li>
+                    </ol>
+                </div>
+            </article>
         </div>
     </section>
 
     <section class="section">
         <h2>UI-/Daten-/Business-Bugs</h2>
 
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                <tr>
-                    <th>Bug-ID</th>
-                    <th>Status</th>
-                    <th>Titel</th>
-                    <th>Fehlerbild</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="bug : ${uiBugs}">
-                    <td><code th:text="${bug.id()}">ui-001</code></td>
-                    <td>
-                        <span th:if="${bug.enabled()}" class="status on">AKTIV</span>
-                        <span th:unless="${bug.enabled()}" class="status off">AUS</span>
-                    </td>
-                    <td th:text="${bug.title()}">Titel</td>
-                    <td th:text="${bug.description()}">Beschreibung</td>
-                </tr>
-                </tbody>
-            </table>
+        <div class="bug-grid">
+            <article class="bug-card" th:each="bug : ${uiBugs}">
+                <div class="bug-card-header">
+                    <code th:text="${bug.id()}">ui-001</code>
+
+                    <span th:if="${bug.enabled()}" class="status on">AKTIV</span>
+                    <span th:unless="${bug.enabled()}" class="status off">AUS</span>
+
+                    <div>
+                        <div class="bug-title" th:text="${bug.title()}">Titel</div>
+                        <div class="bug-description" th:text="${bug.description()}">Beschreibung</div>
+                    </div>
+                </div>
+
+                <div class="bug-card-body">
+                    <h3>Reproduktionsschritte</h3>
+                    <ol class="steps">
+                        <li th:each="step : ${bug.steps()}" th:text="${step}">
+                            Schritt
+                        </li>
+                    </ol>
+                </div>
+            </article>
         </div>
     </section>
 </main>
