@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bug Status - TechGear Pro</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --accent: #0f172a;
+            --background: #f6f8fb;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --green-bg: #dcfce7;
+            --green-text: #166534;
+            --red-bg: #fee2e2;
+            --red-text: #991b1b;
+            --shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .top-bar {
+            background: var(--accent);
+            color: #e5e7eb;
+            font-size: 14px;
+            padding: 10px 24px;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), #38bdf8);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+        }
+
+        .nav {
+            display: flex;
+            gap: 18px;
+            color: #374151;
+            font-size: 15px;
+        }
+
+        .nav a:hover {
+            color: var(--primary);
+        }
+
+        .main {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 34px 24px 56px;
+        }
+
+        .hero {
+            border-radius: 26px;
+            background:
+                radial-gradient(circle at top right, rgba(37, 99, 235, 0.16), transparent 30%),
+                linear-gradient(135deg, #ffffff, #eff6ff);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 38px;
+            margin-bottom: 28px;
+        }
+
+        .hero h1 {
+            margin: 0 0 12px;
+            font-size: 42px;
+            color: #0f172a;
+        }
+
+        .hero p {
+            margin: 0;
+            color: #4b5563;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        .summary {
+            margin-top: 22px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .summary-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 18px;
+            min-width: 170px;
+        }
+
+        .summary-card strong {
+            display: block;
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+
+        .summary-card span {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .section {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            margin: 0 0 18px;
+            font-size: 26px;
+            color: #0f172a;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 780px;
+            background: white;
+        }
+
+        th,
+        td {
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #374151;
+            font-weight: 800;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        code {
+            background: #eef2ff;
+            color: #1d4ed8;
+            padding: 3px 6px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .status.on {
+            background: var(--red-bg);
+            color: var(--red-text);
+        }
+
+        .status.off {
+            background: var(--green-bg);
+            color: var(--green-text);
+        }
+
+        .hint {
+            background: #fffbeb;
+            border: 1px solid #f0d36a;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 24px;
+            color: #5f4b00;
+            line-height: 1.55;
+        }
+
+        .footer {
+            background: #0f172a;
+            color: #9ca3af;
+            padding: 34px 24px;
+            font-size: 14px;
+        }
+
+        .footer-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 900px) {
+            .nav {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    Interne BugLab-Statusseite - nicht fuer Kundendemos verwenden
+</div>
+
+<header class="header">
+    <div class="header-inner">
+        <a href="/" class="brand">
+            <span class="brand-logo">TG</span>
+            <span>TechGear Pro</span>
+        </a>
+
+        <nav class="nav">
+            <a href="/">Startseite</a>
+            <a href="/products">Shop</a>
+            <a href="/cart">Warenkorb</a>
+            <a href="/test-info">Testinfo</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main">
+    <section class="hero">
+        <h1>BugLab v1 Status</h1>
+        <p>
+            Interne Uebersicht der aktuell aktiven Bug-Toggles aus der application.properties.
+        </p>
+
+        <div class="summary">
+            <div class="summary-card">
+                <strong th:text="${activeBugCount}">0</strong>
+                <span>aktive Bugs</span>
+            </div>
+
+            <div class="summary-card">
+                <strong th:text="${totalBugCount}">20</strong>
+                <span>Bugs insgesamt</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="hint">
+        Werte werden aus <code>src/main/resources/application.properties</code> gelesen.
+        Nach einer Aenderung der Datei die Anwendung neu starten.
+    </div>
+
+    <section class="section">
+        <h2>UI-getriggerte HTTP/API-artige Fehler</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Bug-ID</th>
+                    <th>Status</th>
+                    <th>Titel</th>
+                    <th>Fehlerbild</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="bug : ${apiBugs}">
+                    <td><code th:text="${bug.id()}">api-001</code></td>
+                    <td>
+                        <span th:if="${bug.enabled()}" class="status on">AKTIV</span>
+                        <span th:unless="${bug.enabled()}" class="status off">AUS</span>
+                    </td>
+                    <td th:text="${bug.title()}">Titel</td>
+                    <td th:text="${bug.description()}">Beschreibung</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>UI-/Daten-/Business-Bugs</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Bug-ID</th>
+                    <th>Status</th>
+                    <th>Titel</th>
+                    <th>Fehlerbild</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="bug : ${uiBugs}">
+                    <td><code th:text="${bug.id()}">ui-001</code></td>
+                    <td>
+                        <span th:if="${bug.enabled()}" class="status on">AKTIV</span>
+                        <span th:unless="${bug.enabled()}" class="status off">AUS</span>
+                    </td>
+                    <td th:text="${bug.title()}">Titel</td>
+                    <td th:text="${bug.description()}">Beschreibung</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <div>© TechGear Pro - Interne BugLab-Statusseite</div>
+        <div>BugLab v1 - 20 geplante Bugs</div>
+    </div>
+</footer>
+
+</body>
+</html>

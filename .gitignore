@@ -1,0 +1,27 @@
+cat > .gitignore <<'EOF'
+# Build output
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Local Maven repository
+.mvn/repository/
+
+# Keep Maven wrapper and settings
+!.mvn/wrapper/
+!.mvn/wrapper/maven-wrapper.properties
+!.mvn/settings-public.xml
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+EOF

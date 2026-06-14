@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - TechGear Pro</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --accent: #0f172a;
+            --background: #f6f8fb;
+            --surface: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --soft-blue: #eff6ff;
+            --soft-green: #ecfdf5;
+            --soft-red: #fef2f2;
+            --shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .top-bar {
+            background: var(--accent);
+            color: #e5e7eb;
+            font-size: 14px;
+            padding: 10px 24px;
+        }
+
+        .top-bar-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), #38bdf8);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            color: #374151;
+            font-size: 15px;
+        }
+
+        .nav a:hover {
+            color: var(--primary);
+        }
+
+        .nav-cart {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: white;
+        }
+
+        .nav-cta {
+            padding: 11px 16px;
+            border-radius: 999px;
+            background: var(--primary);
+            color: white !important;
+            font-weight: 700;
+        }
+
+        .main {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 42px 24px 64px;
+        }
+
+        .login-layout {
+            display: grid;
+            grid-template-columns: 1fr 0.9fr;
+            gap: 28px;
+            align-items: stretch;
+        }
+
+        .intro-card {
+            border-radius: 28px;
+            background:
+                radial-gradient(circle at top right, rgba(37, 99, 235, 0.18), transparent 30%),
+                linear-gradient(135deg, #ffffff, #eff6ff);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 46px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .eyebrow {
+            width: fit-content;
+            padding: 8px 13px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .intro-card h1 {
+            margin: 0 0 16px;
+            font-size: 44px;
+            line-height: 1.08;
+            letter-spacing: -1px;
+            color: #0f172a;
+        }
+
+        .intro-card p {
+            margin: 0 0 24px;
+            color: #4b5563;
+            font-size: 17px;
+            line-height: 1.65;
+        }
+
+        .benefit-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 12px;
+            color: #374151;
+        }
+
+        .benefit-list li {
+            display: flex;
+            gap: 10px;
+            align-items: start;
+        }
+
+        .login-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 34px;
+        }
+
+        .login-card h2 {
+            margin: 0 0 8px;
+            font-size: 30px;
+            color: #0f172a;
+        }
+
+        .login-card > p {
+            margin: 0 0 24px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .message-error,
+        .message-success {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+
+        .message-error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+
+        .message-success {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #166534;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 15px;
+            background: white;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #93c5fd;
+            box-shadow: 0 0 0 3px #dbeafe;
+        }
+
+        .error {
+            margin-top: 7px;
+            color: #b91c1c;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .actions {
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+        }
+
+        .button.secondary {
+            background: white;
+            color: var(--primary);
+            border: 1px solid #bfdbfe;
+        }
+
+        .button.secondary:hover {
+            background: #eff6ff;
+        }
+
+        .demo-box {
+            margin-top: 24px;
+            padding: 18px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.55;
+        }
+
+        code {
+            background: #eef2ff;
+            color: #1d4ed8;
+            padding: 3px 6px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .footer {
+            background: #0f172a;
+            color: #d1d5db;
+            padding: 34px 24px;
+        }
+
+        .footer-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .nav {
+                display: none;
+            }
+
+            .login-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .intro-card,
+            .login-card {
+                padding: 28px;
+            }
+
+            .intro-card h1 {
+                font-size: 34px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="top-bar-inner">
+        <span>Kostenloser Versand ab 100 €</span>
+        <span>30 Tage Rückgabe · Sicherer Checkout · Business Support</span>
+    </div>
+</div>
+
+<header class="header">
+    <div class="header-inner">
+        <a href="/" class="brand" data-testid="login-brand-link">
+            <span class="brand-logo">TG</span>
+            <span>TechGear Pro</span>
+        </a>
+
+        <nav class="nav" aria-label="Hauptnavigation">
+            <a href="/products" data-testid="nav-shop-link">Shop</a>
+            <a href="/products?q=mouse" data-testid="nav-categories-link">Kategorien</a>
+            <a href="/products?q=headphones" data-testid="nav-deals-link">Angebote</a>
+            <a href="/products?q=stand" data-testid="nav-business-link">Für Unternehmen</a>
+            <a href="/login" data-testid="nav-account-link">Konto</a>
+            <a class="nav-cart" href="/cart" data-testid="nav-cart-link">Warenkorb</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main">
+    <section class="login-layout">
+        <div class="intro-card">
+            <span class="eyebrow">Kundenkonto</span>
+            <h1>Willkommen zurück bei TechGear Pro.</h1>
+            <p>
+                Melden Sie sich an, um Ihr Konto, Ihre Rolle und kundenbezogene Shop-Funktionen aufzurufen.
+            </p>
+
+            <ul class="benefit-list">
+                <li>✓ Übersichtliche Kontoansicht</li>
+                <li>✓ Zugriff auf geschützte Kundenbereiche</li>
+                <li>✓ Realistischer Login-Flow für professionelle Shop-Demos</li>
+            </ul>
+        </div>
+
+        <div class="login-card" data-testid="login-page">
+            <h2>Einloggen</h2>
+            <p>Verwenden Sie einen Demo-Zugang, um das Kundenkonto zu öffnen.</p>
+
+            <div th:if="${successMessage}" class="message-success" data-testid="success-message">
+                <span th:text="${successMessage}">Erfolgreich</span>
+            </div>
+
+            <div th:if="${errorMessage}" class="message-error" data-testid="error-message">
+                <span th:text="${errorMessage}">Fehler</span>
+            </div>
+
+            <div th:if="${loginError}" class="message-error" data-testid="login-error-message">
+                <span th:text="${loginError}">Login fehlgeschlagen</span>
+            </div>
+
+            <form method="post" action="/login" th:object="${loginForm}" data-testid="login-form">
+                <div class="form-group">
+                    <label for="email">E-Mail-Adresse</label>
+                    <input id="email"
+                           type="email"
+                           th:field="*{email}"
+                           placeholder="user@example.com"
+                           data-testid="login-email">
+
+                    <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+                        Fehler E-Mail
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Passwort</label>
+                    <input id="password"
+                           type="password"
+                           th:field="*{password}"
+                           placeholder="Passwort eingeben"
+                           data-testid="login-password">
+
+                    <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">
+                        Fehler Passwort
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <a class="button secondary" href="/" data-testid="login-cancel-button">
+                        Zur Startseite
+                    </a>
+                    <button class="button" type="submit" data-testid="login-submit-button">
+                        Einloggen
+                    </button>
+                </div>
+            </form>
+
+            <div class="demo-box">
+                <strong>Demo-Zugang:</strong><br>
+                E-Mail: <code>user@example.com</code><br>
+                Passwort: <code>password123</code><br><br>
+                Admin-Demo: <code>admin@example.com</code> / <code>admin123</code>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <div>© TechGear Pro · Demo-Shop für technische Geräte</div>
+        <div>Produkte · Konto · Warenkorb · Sicherer Checkout</div>
+    </div>
+</footer>
+
+</body>
+</html>
