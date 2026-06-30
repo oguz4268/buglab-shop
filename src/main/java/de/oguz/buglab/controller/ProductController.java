@@ -1,7 +1,9 @@
 package de.oguz.buglab.controller;
 
+import de.oguz.buglab.api.BugTriggeredException;
 import de.oguz.buglab.model.Product;
 import de.oguz.buglab.service.BugToggleService;
+import de.oguz.buglab.service.BugTracker;
 import de.oguz.buglab.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -9,7 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -20,11 +21,14 @@ public class ProductController {
 
     private final ProductService productService;
     private final BugToggleService bugToggleService;
+    private final BugTracker bugTracker;
 
     public ProductController(ProductService productService,
-                             BugToggleService bugToggleService) {
+                             BugToggleService bugToggleService,
+                             BugTracker bugTracker) {
         this.productService = productService;
         this.bugToggleService = bugToggleService;
+        this.bugTracker = bugTracker;
     }
 
     @GetMapping("/products")
@@ -35,15 +39,19 @@ public class ProductController {
                            Model model) {
 
         if (bugToggleService.isEnabled("api-003") && "true".equalsIgnoreCase(reset)) {
-            throw new ResponseStatusException(
+            bugTracker.record("api-003");
+            throw new BugTriggeredException(
                     HttpStatus.BAD_REQUEST,
+                    "api-003",
                     "BUG-API-003: Reset request failed"
             );
         }
 
         if (bugToggleService.isEnabled("api-004") && "true".equalsIgnoreCase(fromCart)) {
-            throw new ResponseStatusException(
+            bugTracker.record("api-004");
+            throw new BugTriggeredException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
+                    "api-004",
                     "BUG-API-004: Continue shopping from cart failed"
             );
         }
@@ -51,8 +59,10 @@ public class ProductController {
         if (bugToggleService.isEnabled("api-005")
                 && category != null
                 && category.equalsIgnoreCase("Adapter & Hubs")) {
-            throw new ResponseStatusException(
+            bugTracker.record("api-005");
+            throw new BugTriggeredException(
                     HttpStatus.BAD_REQUEST,
+                    "api-005",
                     "BUG-API-005: Category request failed"
             );
         }
@@ -67,6 +77,7 @@ public class ProductController {
         if (bugToggleService.isEnabled("ui-004")
                 && category != null
                 && category.equalsIgnoreCase("Audio")) {
+            bugTracker.record("ui-004");
             resultCount = resultCount + 3;
         }
 
@@ -75,6 +86,7 @@ public class ProductController {
         if (bugToggleService.isEnabled("ui-005")
                 && category != null
                 && category.equalsIgnoreCase("Monitore")) {
+            bugTracker.record("ui-005");
             selectedCategory = "Audio";
         }
 
@@ -94,8 +106,10 @@ public class ProductController {
                                 RedirectAttributes redirectAttributes) {
 
         if (bugToggleService.isEnabled("api-002") && id.equals(4L)) {
-            throw new ResponseStatusException(
+            bugTracker.record("api-002");
+            throw new BugTriggeredException(
                     HttpStatus.NOT_FOUND,
+                    "api-002",
                     "BUG-API-002: Laptop Stand detail page not found"
             );
         }
@@ -113,6 +127,7 @@ public class ProductController {
 
     private Product applyProductListBugs(Product product) {
         if (bugToggleService.isEnabled("ui-002") && product.id().equals(1L)) {
+            bugTracker.record("ui-002");
             return copyProduct(
                     product,
                     new BigDecimal("21.99"),
@@ -125,6 +140,7 @@ public class ProductController {
         }
 
         if (bugToggleService.isEnabled("ui-006") && product.id().equals(8L)) {
+            bugTracker.record("ui-006");
             return copyProduct(
                     product,
                     product.price(),
@@ -137,6 +153,7 @@ public class ProductController {
         }
 
         if (bugToggleService.isEnabled("ui-007") && product.id().equals(9L)) {
+            bugTracker.record("ui-007");
             return copyProduct(
                     product,
                     product.price(),
@@ -153,6 +170,7 @@ public class ProductController {
 
     private Product applyProductDetailBugs(Product product) {
         if (bugToggleService.isEnabled("ui-003") && product.id().equals(1L)) {
+            bugTracker.record("ui-003");
             return copyProduct(
                     product,
                     product.price(),

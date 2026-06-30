@@ -1,8 +1,10 @@
 package de.oguz.buglab.controller;
 
+import de.oguz.buglab.api.BugTriggeredException;
 import de.oguz.buglab.model.Cart;
 import de.oguz.buglab.model.Product;
 import de.oguz.buglab.service.BugToggleService;
+import de.oguz.buglab.service.BugTracker;
 import de.oguz.buglab.service.ProductService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
@@ -11,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -23,11 +24,14 @@ public class CartController {
 
     private final ProductService productService;
     private final BugToggleService bugToggleService;
+    private final BugTracker bugTracker;
 
     public CartController(ProductService productService,
-                          BugToggleService bugToggleService) {
+                          BugToggleService bugToggleService,
+                          BugTracker bugTracker) {
         this.productService = productService;
         this.bugToggleService = bugToggleService;
+        this.bugTracker = bugTracker;
     }
 
     @GetMapping("/cart")
@@ -43,8 +47,10 @@ public class CartController {
                             RedirectAttributes redirectAttributes) {
 
         if (bugToggleService.isEnabled("api-001") && productId.equals(5L)) {
-            throw new ResponseStatusException(
+            bugTracker.record("api-001");
+            throw new BugTriggeredException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
+                    "api-001",
                     "BUG-API-001: Could not add Noise Cancelling Headphones to cart"
             );
         }
@@ -60,11 +66,16 @@ public class CartController {
         }
 
         if (bugToggleService.isEnabled("ui-008") && product.id().equals(2L)) {
+            bugTracker.record("ui-008");
             product = copyProductWithPrice(product, new BigDecimal("79.99"));
         }
 
         boolean ignoreQuantityInLineTotal =
                 bugToggleService.isEnabled("ui-001") && product.id().equals(1L);
+
+        if (ignoreQuantityInLineTotal) {
+            bugTracker.record("ui-001");
+        }
 
         Cart cart = getCart(session);
         cart.addProduct(product, ignoreQuantityInLineTotal);
@@ -83,8 +94,10 @@ public class CartController {
                                  RedirectAttributes redirectAttributes) {
 
         if (bugToggleService.isEnabled("api-008") && productId.equals(8L)) {
-            throw new ResponseStatusException(
+            bugTracker.record("api-008");
+            throw new BugTriggeredException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
+                    "api-008",
                     "BUG-API-008: Could not remove Portable SSD 1TB from cart"
             );
         }
@@ -112,7 +125,11 @@ public class CartController {
             session.setAttribute(CART_SESSION_KEY, cart);
         }
 
-        cart.setCountPositionsInsteadOfQuantity(bugToggleService.isEnabled("ui-009"));
+        boolean countPositions = bugToggleService.isEnabled("ui-009");
+        if (countPositions) {
+            bugTracker.record("ui-009");
+        }
+        cart.setCountPositionsInsteadOfQuantity(countPositions);
 
         return cart;
     }

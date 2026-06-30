@@ -1,8 +1,10 @@
 package de.oguz.buglab.controller;
 
+import de.oguz.buglab.api.BugTriggeredException;
 import de.oguz.buglab.model.Cart;
 import de.oguz.buglab.model.CheckoutForm;
 import de.oguz.buglab.service.BugToggleService;
+import de.oguz.buglab.service.BugTracker;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -11,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -24,9 +25,12 @@ public class CheckoutController {
     private static final String CART_SESSION_KEY = "cart";
 
     private final BugToggleService bugToggleService;
+    private final BugTracker bugTracker;
 
-    public CheckoutController(BugToggleService bugToggleService) {
+    public CheckoutController(BugToggleService bugToggleService,
+                              BugTracker bugTracker) {
         this.bugToggleService = bugToggleService;
+        this.bugTracker = bugTracker;
     }
 
     @GetMapping("/checkout")
@@ -61,8 +65,10 @@ public class CheckoutController {
         if (bugToggleService.isEnabled("api-006")
                 && checkoutForm.getPaymentMethod() != null
                 && isCreditCardPayment(checkoutForm.getPaymentMethod())) {
-            throw new ResponseStatusException(
+            bugTracker.record("api-006");
+            throw new BugTriggeredException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
+                    "api-006",
                     "BUG-API-006: Credit card checkout failed"
             );
         }
@@ -77,6 +83,7 @@ public class CheckoutController {
         BigDecimal orderTotal = cart.getSubtotal();
 
         if (bugToggleService.isEnabled("ui-010")) {
+            bugTracker.record("ui-010");
             orderTotal = orderTotal.add(new BigDecimal("7.50"));
         }
 
@@ -108,7 +115,11 @@ public class CheckoutController {
             session.setAttribute(CART_SESSION_KEY, cart);
         }
 
-        cart.setCountPositionsInsteadOfQuantity(bugToggleService.isEnabled("ui-009"));
+        boolean countPositions = bugToggleService.isEnabled("ui-009");
+        if (countPositions) {
+            bugTracker.record("ui-009");
+        }
+        cart.setCountPositionsInsteadOfQuantity(countPositions);
 
         return cart;
     }

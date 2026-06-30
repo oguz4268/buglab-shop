@@ -1,9 +1,11 @@
 package de.oguz.buglab.controller;
 
+import de.oguz.buglab.api.BugTriggeredException;
 import de.oguz.buglab.model.AuthenticatedUser;
 import de.oguz.buglab.model.LoginForm;
 import de.oguz.buglab.service.AuthService;
 import de.oguz.buglab.service.BugToggleService;
+import de.oguz.buglab.service.BugTracker;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -13,7 +15,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Optional;
@@ -25,11 +26,14 @@ public class AuthController {
 
     private final AuthService authService;
     private final BugToggleService bugToggleService;
+    private final BugTracker bugTracker;
 
     public AuthController(AuthService authService,
-                          BugToggleService bugToggleService) {
+                          BugToggleService bugToggleService,
+                          BugTracker bugTracker) {
         this.authService = authService;
         this.bugToggleService = bugToggleService;
+        this.bugTracker = bugTracker;
     }
 
     @GetMapping("/login")
@@ -54,8 +58,10 @@ public class AuthController {
         if (bugToggleService.isEnabled("api-007")
                 && loginForm.getEmail() != null
                 && loginForm.getEmail().trim().equalsIgnoreCase("admin@example.com")) {
-            throw new ResponseStatusException(
+            bugTracker.record("api-007");
+            throw new BugTriggeredException(
                     HttpStatus.SERVICE_UNAVAILABLE,
+                    "api-007",
                     "BUG-API-007: Admin login service unavailable"
             );
         }
@@ -71,6 +77,7 @@ public class AuthController {
             if (bugToggleService.isEnabled("ui-011")
                     && loginForm.getEmail() != null
                     && loginForm.getEmail().trim().equalsIgnoreCase("user@example.com")) {
+                bugTracker.record("ui-011");
                 model.addAttribute("loginError", "Anmeldung aktuell nicht moeglich.");
             } else {
                 model.addAttribute("loginError", "E-Mail oder Passwort ist falsch.");
@@ -83,6 +90,7 @@ public class AuthController {
 
         if (bugToggleService.isEnabled("ui-012")
                 && userToStore.email().equalsIgnoreCase("user@example.com")) {
+            bugTracker.record("ui-012");
             userToStore = new AuthenticatedUser(
                     userToStore.email(),
                     userToStore.fullName(),
